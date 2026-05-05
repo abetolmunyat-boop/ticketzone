@@ -28,7 +28,8 @@ const Checkout = () => {
     setIsProcessing(true);
     try {
       if (paymentMethod === 'mpesa') {
-        const res = await axios.post('http://localhost:5000/api/mpesa/stk-push', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await axios.post(`${API_URL}/api/mpesa/stk-push`, {
           amount: totalPrice,
           phoneNumber,
           eventId: id,

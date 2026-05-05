@@ -32,9 +32,10 @@ const Home = () => {
         if (selectedCategory !== 'All') query.append('category', selectedCategory);
         if (searchTerm) query.append('search', searchTerm);
 
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const [eventsRes, featuredRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/events?${query.toString()}`),
-          axios.get('http://localhost:5000/api/events/featured')
+          axios.get(`${API_URL}/api/events?${query.toString()}`),
+          axios.get(`${API_URL}/api/events/featured`)
         ]);
 
         setEvents(eventsRes.data);

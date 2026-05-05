@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, TrendingUp, Users, Calendar, X, Image as ImageIcon
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +31,7 @@ const AdminDashboard = () => {
 
   const fetchEvents = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/events');
+      const res = await axios.get(`${API_URL}/api/events`);
       setEvents(res.data);
     } catch (err) {
       console.error('Error fetching events:', err);
@@ -54,9 +55,9 @@ const AdminDashboard = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       if (editingEvent) {
-        await axios.put(`http://localhost:5000/api/events/${editingEvent._id}`, formData, config);
+        await axios.put(`${API_URL}/api/events/${editingEvent._id}`, formData, config);
       } else {
-        await axios.post('http://localhost:5000/api/events', formData, config);
+        await axios.post(`${API_URL}/api/events`, formData, config);
       }
       
       setIsModalOpen(false);
@@ -71,7 +72,7 @@ const AdminDashboard = () => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:5000/api/events/${id}`, {
+        await axios.delete(`${API_URL}/api/events/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         fetchEvents();

@@ -16,7 +16,8 @@ const EventDetails = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/events/${id}`);
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await axios.get(`${API_URL}/api/events/${id}`);
         setEvent(res.data);
       } catch (err) {
         console.error('Error fetching event:', err);
