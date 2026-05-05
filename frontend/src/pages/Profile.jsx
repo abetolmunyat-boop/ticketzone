@@ -14,6 +14,70 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
 
+  const downloadTicketPDF = () => {
+    if (!selectedTicket) return;
+    const { order, seat } = selectedTicket;
+    const event = order.event;
+    const qrValue = `TICKET-${order._id}-${seat}`;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>TicketsZone - ${event.title}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: Arial, sans-serif; background: white; display: flex; justify-content: center; padding: 40px; }
+          .ticket { width: 420px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; }
+          .header { background: #026cdf; padding: 28px; text-align: center; color: white; }
+          .header h1 { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px; }
+          .header p { font-size: 13px; opacity: 0.85; }
+          .logo { font-size: 11px; opacity: 0.7; margin-top: 8px; letter-spacing: 1px; text-transform: uppercase; }
+          .body { padding: 32px; display: flex; flex-direction: column; align-items: center; }
+          .qr-wrap { background: white; padding: 16px; border: 2px solid #f0f0f0; border-radius: 16px; margin-bottom: 24px; }
+          .details { width: 100%; margin-bottom: 24px; }
+          .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+          .label { color: #9ca3af; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
+          .value { font-weight: 700; color: #111; }
+          .footer { font-size: 10px; color: #9ca3af; text-align: center; text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.8; }
+          .perforated { border-top: 2px dashed #e5e7eb; margin: 16px 0; }
+          @media print { body { padding: 0; } .ticket { box-shadow: none; } }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+      </head>
+      <body>
+        <div class="ticket">
+          <div class="header">
+            <div class="logo">🎫 TicketsZone</div>
+            <h1>${event.title}</h1>
+            <p>${new Date(event.date).toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          </div>
+          <div class="body">
+            <div class="qr-wrap">
+              <canvas id="qrCanvas"></canvas>
+            </div>
+            <div class="details">
+              <div class="row"><span class="label">Event</span><span class="value">${event.title}</span></div>
+              <div class="row"><span class="label">Venue</span><span class="value">${event.venue || event.location}</span></div>
+              <div class="row"><span class="label">Date</span><span class="value">${new Date(event.date).toLocaleDateString()}</span></div>
+              <div class="row"><span class="label">Seat</span><span class="value">${seat}</span></div>
+              <div class="row"><span class="label">Order ID</span><span class="value">${order._id.slice(-8).toUpperCase()}</span></div>
+            </div>
+            <div class="perforated"></div>
+            <div class="footer">Present this QR code at the venue entrance<br />Verified by TicketsZone Guarantee &bull; ticketzone-cyan.vercel.app</div>
+          </div>
+        </div>
+        <script>
+          QRCode.toCanvas(document.getElementById('qrCanvas'), '${qrValue}', { width: 200 }, function() {
+            setTimeout(() => window.print(), 500);
+          });
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   useEffect(() => {
     if (!user) return;
     
@@ -231,12 +295,20 @@ const Profile = () => {
                 </p>
               </div>
               
-              <button 
-                onClick={() => setSelectedTicket(null)}
-                className="w-full py-5 bg-gray-50 text-secondary font-bold text-sm border-t border-gray-100 hover:bg-gray-100 transition-all"
-              >
-                Close Ticket
-              </button>
+              <div style={{ display: 'flex', borderTop: '1px solid #f3f4f6' }}>
+                <button
+                  onClick={downloadTicketPDF}
+                  style={{ flex: 1, padding: '1.25rem', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                >
+                  📥 Download PDF
+                </button>
+                <button
+                  onClick={() => setSelectedTicket(null)}
+                  style={{ flex: 1, padding: '1.25rem', background: '#f9fafb', border: 'none', fontWeight: '700', fontSize: '0.875rem', cursor: 'pointer' }}
+                >
+                  Close
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
