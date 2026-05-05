@@ -26,27 +26,42 @@ const Checkout = () => {
     }
 
     setIsProcessing(true);
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const authHeader = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+
     try {
       if (paymentMethod === 'mpesa') {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await axios.post(`${API_URL}/api/mpesa/stk-push`, {
+        // M-Pesa flow: call STK push, then save order
+        await axios.post(`${API_URL}/api/mpesa/stk-push`, {
           amount: totalPrice,
           phoneNumber,
           eventId: id,
           seats: selectedSeats.map(s => s.id)
-        }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        
-        // In simulation, we show success after the call
-        setIsSuccess(true);
+        }, { headers: authHeader });
+
+        // Save the order as completed
+        await axios.post(`${API_URL}/api/payments/save-order`, {
+          eventId: id,
+          seats: selectedSeats.map(s => s.id),
+          totalAmount: totalPrice,
+          paymentMethod: 'mpesa'
+        }, { headers: authHeader });
+
       } else {
-        // Stripe simulation
+        // Card (simulated) — wait 2s then save order
         await new Promise(resolve => setTimeout(resolve, 2000));
-        setIsSuccess(true);
+
+        await axios.post(`${API_URL}/api/payments/save-order`, {
+          eventId: id,
+          seats: selectedSeats.map(s => s.id),
+          totalAmount: totalPrice,
+          paymentMethod: 'card'
+        }, { headers: authHeader });
       }
+
+      setIsSuccess(true);
     } catch (err) {
-      alert(err.response?.data?.message || 'Payment failed');
+      alert(err.response?.data?.message || 'Payment failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }

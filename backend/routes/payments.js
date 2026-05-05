@@ -46,6 +46,27 @@ router.post('/confirm-payment', async (req, res) => {
   }
 });
 
+// Save order after payment (card simulation or M-Pesa)
+router.post('/save-order', protect, async (req, res) => {
+  try {
+    const { eventId, seats, totalAmount, paymentMethod } = req.body;
+    const order = new Order({
+      user: req.user._id,
+      event: eventId,
+      seats: seats,
+      totalAmount: totalAmount,
+      paymentMethod: paymentMethod || 'card',
+      paymentIntentId: `sim_${Date.now()}`,
+      status: 'completed'
+    });
+    await order.save();
+    res.status(201).json(order);
+  } catch (err) {
+    console.error('Save order error:', err.message);
+    res.status(500).json({ message: err.message || 'Server error' });
+  }
+});
+
 // Get user orders
 router.get('/user-orders', protect, async (req, res) => {
   try {
