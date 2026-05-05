@@ -132,8 +132,8 @@ const AdminDashboard = () => {
           <div className="p-6 border-b border-border bg-gray-50/50">
             <h2 className="text-xl font-bold">All Events</h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto custom-scrollbar pb-2">
+            <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="bg-gray-50">
                   <th className="text-left p-6 text-xs font-bold uppercase tracking-wider text-text-muted">Event</th>
